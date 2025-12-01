@@ -1,4 +1,4 @@
-package util;
+package com.lucas.petshop.util;
 
 
 import lombok.extern.slf4j.Slf4j;
