@@ -22,6 +22,7 @@ CONSTRAINT fk_product_rating FOREIGN KEY (product_id) REFERENCES tb_products (pr
 
 CREATE TABLE tb_orders (
 order_id BIGSERIAL PRIMARY KEY,
+quantity INTEGER NOT NULL,
 client VARCHAR(50) NOT NULL,
 date_time TIMESTAMP NOT NULL,
 status  VARCHAR(20) NOT NULL
