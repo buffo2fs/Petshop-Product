@@ -1,0 +1,11 @@
+{
+  "id":1,
+  "name": "teste",
+  "type": "teste",
+  "animalType": "teste",
+  "brand": "teste",
+  "description": "teste",
+  "stock": 1,
+  "price": 1.00,
+  "sizeWeight": 1.00
+}

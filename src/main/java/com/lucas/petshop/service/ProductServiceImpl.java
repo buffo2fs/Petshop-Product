@@ -54,7 +54,19 @@ public class ProductServiceImpl implements ProductService {
     public void updateProduct(Long id, Product product) {
         var startTime = System.currentTimeMillis();
 
-        productRepository.save(product);
+        Product existingProduct = productRepository.findById(id)
+                        .orElseThrow(() -> new RuntimeException("PRODUCT NOT FOUND"));
+
+        existingProduct.setName(product.getName());
+        existingProduct.setType(product.getType());
+        existingProduct.setAnimalType(product.getAnimalType());
+        existingProduct.setBrand(product.getBrand());
+        existingProduct.setDescription(product.getDescription());
+        existingProduct.setStock(product.getStock());
+        existingProduct.setPrice(product.getPrice());
+        existingProduct.setSizeWeight(product.getSizeWeight());
+
+        productRepository.save(existingProduct);
 
         Timer.measure("[UPDATE PRODUCT] - Successfully", startTime);
     }
@@ -63,7 +75,10 @@ public class ProductServiceImpl implements ProductService {
     public void deleteProduct(Long id) {
         var startTime = System.currentTimeMillis();
 
-        productRepository.deleteById(id);
+        Product existingProduct = productRepository.findById(id)
+                        .orElseThrow(() -> new RuntimeException(("PRODUCT NOT FOUND")));
+
+        productRepository.delete(existingProduct);
 
         Timer.measure("[DELETE PRODUCT] - Successfully", startTime);
     }
