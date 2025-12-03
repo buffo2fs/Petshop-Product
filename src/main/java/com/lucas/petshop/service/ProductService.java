@@ -1,17 +1,22 @@
 package com.lucas.petshop.service;
 
+import com.lucas.petshop.dto.ProductRequestDTO;
+import com.lucas.petshop.dto.ProductResponseDTO;
+import com.lucas.petshop.dto.ProductUpdateDTO;
 import com.lucas.petshop.model.Product;
 import java.util.List;
 
 public interface ProductService {
 
-    List<Product> getAllProducts();
+    List<ProductResponseDTO> getAllProducts();
 
-    Product getProductById(Long id);
+    ProductResponseDTO getProductById(Long id);
 
-    long createProduct(Product product);
+    long createProduct(ProductRequestDTO product);
 
-    void updateProduct(Long id, Product product);
+    void updateProduct(Long id, ProductRequestDTO product);
 
     void deleteProduct(Long id);
+
+    ProductResponseDTO partialUpdateProduct(Long id, ProductUpdateDTO product);
 }

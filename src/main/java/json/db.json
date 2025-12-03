@@ -1,10 +1,9 @@
 {
-  "id":1,
   "name": "teste",
   "type": "teste",
   "animalType": "teste",
   "brand": "teste",
-  "description": "teste",
+  "description": "1234567890",
   "stock": 1,
   "price": 1.00,
   "sizeWeight": 1.00

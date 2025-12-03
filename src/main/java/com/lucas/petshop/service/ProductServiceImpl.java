@@ -1,5 +1,9 @@
 package com.lucas.petshop.service;
 
+import com.lucas.petshop.dto.ProductRequestDTO;
+import com.lucas.petshop.dto.ProductResponseDTO;
+import com.lucas.petshop.dto.ProductUpdateDTO;
+import com.lucas.petshop.mapper.ProductMapper;
 import com.lucas.petshop.repository.ProductRepository;
 import com.lucas.petshop.model.Product;
 import com.lucas.petshop.util.Timer;
@@ -8,7 +12,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 
+
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class ProductServiceImpl implements ProductService {
@@ -17,56 +23,64 @@ public class ProductServiceImpl implements ProductService {
     private ProductRepository productRepository;
 
     @Override
-    public List<Product> getAllProducts() {
+    public List<ProductResponseDTO> getAllProducts() {
         var startTime = System.currentTimeMillis();
-
-        List<Product> productList = productRepository.findAll();
-
         Timer.measure("[GET ALL PRODUCTS] - Successfully", startTime);
-        return productList;
 
+        return productRepository.findAll()
+                .stream()
+                .filter(product -> !Boolean.TRUE.equals(product.getDeletedProduct()))
+                .map(ProductMapper::toDTO)
+                .collect(Collectors.toList());
 
     }
 
     @Override
-    public Product getProductById(Long id) {
+    public ProductResponseDTO getProductById(Long id) {
         var startTime = System.currentTimeMillis();
 
-        Product products = productRepository.getById(id);
+        Product product = getProductIfExist(id);
+
+        if (Boolean.TRUE.equals(product.getDeletedProduct())) {
+            throw new RuntimeException("PRODUCT IS DELETED");
+        }
 
         Timer.measure("[GET PRODUCT BY ID] - Successfully", startTime);
-        return products;
+        return ProductMapper.toDTO(product);
     }
 
     @Override
     @Transactional
-    public long createProduct(Product product) {
+    public long createProduct(ProductRequestDTO dto) {
         var startTime = System.currentTimeMillis();
-
-        Product newProduct = productRepository.save(product);
+        Product products = ProductMapper.toEntity(dto);
+        Product saved = productRepository.save(products);
 
         Timer.measure("[CREATE PRODUCT] - Successfully", startTime);
-        return newProduct.getId();
+        return saved.getId();
     }
 
     @Override
     @Transactional
-    public void updateProduct(Long id, Product product) {
+    public void updateProduct(Long id, ProductRequestDTO dto) {
         var startTime = System.currentTimeMillis();
 
-        Product existingProduct = productRepository.findById(id)
-                        .orElseThrow(() -> new RuntimeException("PRODUCT NOT FOUND"));
+        Product existing = getProductIfExist(id);
 
-        existingProduct.setName(product.getName());
-        existingProduct.setType(product.getType());
-        existingProduct.setAnimalType(product.getAnimalType());
-        existingProduct.setBrand(product.getBrand());
-        existingProduct.setDescription(product.getDescription());
-        existingProduct.setStock(product.getStock());
-        existingProduct.setPrice(product.getPrice());
-        existingProduct.setSizeWeight(product.getSizeWeight());
+        if (Boolean.TRUE.equals(existing.getDeletedProduct())) {
+            throw new RuntimeException("CANNOT UPDATE A DELETED PRODUCT");
+        }
 
-        productRepository.save(existingProduct);
+        existing.setName(dto.name());
+        existing.setType(dto.type());
+        existing.setAnimalType(dto.animalType());
+        existing.setBrand(dto.brand());
+        existing.setDescription(dto.description());
+        existing.setStock(dto.stock());
+        existing.setPrice(dto.price());
+        existing.setSizeWeight(dto.sizeWeight());
+
+        productRepository.save(existing);
 
         Timer.measure("[UPDATE PRODUCT] - Successfully", startTime);
     }
@@ -74,13 +88,48 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public void deleteProduct(Long id) {
         var startTime = System.currentTimeMillis();
+        Product existing = getProductIfExist(id);
 
-        Product existingProduct = productRepository.findById(id)
-                        .orElseThrow(() -> new RuntimeException(("PRODUCT NOT FOUND")));
+        if (Boolean.TRUE.equals(existing.getDeletedProduct())) {
+            throw new RuntimeException("PRODUCT ALREADY DELETED");
+        }
 
-        productRepository.delete(existingProduct);
+        existing.setDeletedProduct(true);
+        existing.setLastUpdate(java.time.LocalDateTime.now());
+
+        productRepository.save(existing);
 
         Timer.measure("[DELETE PRODUCT] - Successfully", startTime);
+    }
+
+    @Override
+    @Transactional
+    public ProductResponseDTO partialUpdateProduct(Long id, ProductUpdateDTO dto) {
+        var startTime = System.currentTimeMillis();
+
+        Product existing = getProductIfExist(id);
+
+        if (Boolean.TRUE.equals(existing.getDeletedProduct())) {
+            throw new RuntimeException("CANNOT UPDATE A DELETED PRODUCT");
+        }
+
+        if (dto.name() != null) existing.setName(dto.name());
+        if (dto.type() != null) existing.setType(dto.type());
+        if (dto.animalType() != null) existing.setAnimalType(dto.animalType());
+        if (dto.brand() != null) existing.setBrand((dto.brand()));
+        if (dto.description() != null) existing.setDescription(dto.description());
+        if (dto.stock() != null) existing.setStock(dto.stock());
+        if (dto.price() != null) existing.setPrice(dto.price());
+        if (dto.sizeWeight() != null) existing.setSizeWeight(dto.sizeWeight());
+
+        existing.setLastUpdate(java.time.LocalDateTime.now());
+
+        productRepository.save(existing);
+
+        Timer.measure("[PATCH PRODUCT] - Successfully", startTime);
+
+        return ProductMapper.toDTO(existing);
+
     }
 
     private Product getProductIfExist(long id) {
@@ -89,5 +138,9 @@ public class ProductServiceImpl implements ProductService {
             throw new RuntimeException("Product not found");
         }
         return product;
+
     }
 }
+
+
+
