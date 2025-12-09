@@ -12,7 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 
-
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -79,6 +79,7 @@ public class ProductServiceImpl implements ProductService {
         existing.setStock(dto.stock());
         existing.setPrice(dto.price());
         existing.setSizeWeight(dto.sizeWeight());
+        existing.setLastUpdate(LocalDateTime.now());
 
         productRepository.save(existing);
 
@@ -122,7 +123,7 @@ public class ProductServiceImpl implements ProductService {
         if (dto.price() != null) existing.setPrice(dto.price());
         if (dto.sizeWeight() != null) existing.setSizeWeight(dto.sizeWeight());
 
-        existing.setLastUpdate(java.time.LocalDateTime.now());
+        existing.setLastUpdate(LocalDateTime.now());
 
         productRepository.save(existing);
 

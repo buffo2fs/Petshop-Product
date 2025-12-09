@@ -27,10 +27,10 @@ CREATE TABLE tb_orders (
 order_id BIGSERIAL PRIMARY KEY,
 quantity INTEGER NOT NULL,
 client VARCHAR(50) NOT NULL,
-date_time TIMESTAMP NOT NULL,
 status  VARCHAR(20) NOT NULL,
-created_at TIMESTAMP,
-last_update TIMESTAMP
+order_creation TIMESTAMP NOT NULL,
+order_update TIMESTAMP,
+deleted_order BOOLEAN NOT NULL DEFAULT FALSE
 );
 
 CREATE TABLE tb_products_orders (

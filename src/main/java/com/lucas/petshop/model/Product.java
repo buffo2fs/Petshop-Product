@@ -45,8 +45,7 @@ public class Product {
     @Column(name = "created_at", updatable = false, nullable = false)
     private LocalDateTime createdAt;
 
-    @UpdateTimestamp
-    @Column(name = "last_update", nullable = false)
+    @Column(name = "last_update")
     private LocalDateTime lastUpdate;
 
     @Column(name = "deleted_product", nullable = false)
